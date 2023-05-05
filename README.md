@@ -43,3 +43,9 @@ TODO: Description of process including:
     - Behavior if 'copyright' text is in existing comment  
     - Behavior if 'patent' text is in existing comment
     - Behavior if 'swig' text is in existing comment
+
+
+## DoxyGen
+
+This repository contains a precompiled DoxyGen binary from the 51Degrees source version of DoxyGen.
+This has a few modifications. See [source](https://github.com/51degrees/DoxyGen) for more.
