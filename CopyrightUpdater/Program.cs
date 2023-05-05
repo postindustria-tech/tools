@@ -258,10 +258,10 @@ namespace CopyrightUpdater
                 }
                 catch (Exception ex)
                 {
-                    throw;
                     string message = $"Error with file '{file.FullName}'" +
                         $"{Environment.NewLine}{ex.GetType()} - {ex.Message}";
                     Console.WriteLine(message);
+                    throw;
                 }
             });
 
