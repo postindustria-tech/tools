@@ -320,6 +320,10 @@ namespace CopyrightUpdater
                 newComment = newComment.Replace("*/", "");
                 newComment = newComment.Replace("\n *", "\n#");
             }
+            if (filename.EndsWith(".php"))
+            {
+                newComment = $"<?php\r\n{newComment}";
+            }
             return newComment;
         }
 
