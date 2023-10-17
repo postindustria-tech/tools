@@ -118,6 +118,39 @@ namespace CopyrightUpdater
             return result;
         }
 
+        private static bool IsCopyrightStart(char[] buffer, int k, bool isPythodDir)
+        {
+            if (k < 0 || k + 1 >= buffer.Length)
+            {
+                return false;
+            }
+            // Comment blocks will start with either
+            // - /* (Most languages)
+            // - @* (c# razor syntax)
+            // - # (Python), except shebang (#! at file start)
+            return ((buffer[k] == '/' || buffer[k] == '@') && buffer[k + 1] == '*')
+            || (isPythodDir && buffer[k] == '#' && !(k == 0 && buffer[k + 1] == '!'));
+        }
+
+        private static bool IsCopyrightBreak(char[] buffer, int k, bool isPythodDir)
+        {
+            if (k < 0 || k + 2 >= buffer.Length)
+            {
+                return false;
+            }
+            // Comment blocks will end with
+            // - */ (Most languages)
+            // - *@ (c# razor syntax)
+            // - first new line that does not start with a # (Python)
+            // - first new line that starts with a ## (Python)
+            return (buffer[k] == '*'
+                    && (buffer[k + 1] == '/' || buffer[k + 1] == '@'))
+            || (isPythodDir
+                && buffer[k] == '\n'
+                && (!((buffer[k + 1] == '#') || (buffer[k + 2] == '#'))
+                    || ((buffer[k + 1] == '#') && (buffer[k + 2] == '#'))
+                    || IsCopyrightBreak(buffer, k + 1, isPythodDir)));
+        }
 
         private static void LicenseHeaderProcess(DirectoryInfo dir, Config config, bool enforce)
         {
@@ -134,6 +167,8 @@ namespace CopyrightUpdater
 
             var filesByLicenseText = new ConcurrentDictionary<string, ConcurrentBag<string>>();
 
+            bool isPythodDir = dirConfig.directoryKey == "python";
+
             Parallel.ForEach(filteredFiles, file =>
             {
                 try
@@ -144,32 +179,17 @@ namespace CopyrightUpdater
 
                     using (var reader = file.OpenText())
                     {
-                        char[] buffer = new char[2000];
+                        char[] buffer = new char[file.Length];
 
-                        reader.ReadBlock(buffer, 0, 2000);
+                        reader.ReadBlock(buffer, 0, buffer.Length);
 
-                        for (int i = 0; i < 1999; i++)
+                        for (int i = 0; i < buffer.Length; i++)
                         {
-                            // Comment blocks will start with either
-                            // - /* (Most languages)
-                            // - @* (c# razor syntax)
-                            // - # (Python)
-                            if (((buffer[i] == '/' || buffer[i] == '@') &&
-                                buffer[i + 1] == '*') ||
-                                (dirConfig.directoryKey == "python" && buffer[i] == '#'))
+                            if (IsCopyrightStart(buffer, i, isPythodDir))
                             {
-                                i = 0;
-
-                                for (int j = i; j < 1998; j++)
+                                for (int j = i + 1; j < buffer.Length; j++)
                                 {
-                                    // Comment blocks will end with
-                                    // - */ (Most languages)
-                                    // - *@ (c# razor syntax)
-                                    // - first new line that does not start with a # (Python)
-                                    if ((buffer[j] == '*' &&
-                                        (buffer[j + 1] == '/' || buffer[j + 1] == '@')) ||
-                                        (dirConfig.directoryKey == "python" && buffer[j] == '\n' && 
-                                            (buffer[j + 1] == '#' || buffer[j + 2] == '#') == false))
+                                    if (IsCopyrightBreak(buffer, j, isPythodDir))
                                     {
                                         // If we're dealing with a Python file then make sure we
                                         // retain the final 'newline'.
@@ -319,10 +339,6 @@ namespace CopyrightUpdater
                 newComment = newComment.Replace("/*", "#");
                 newComment = newComment.Replace("*/", "");
                 newComment = newComment.Replace("\n *", "\n#");
-            }
-            if (filename.EndsWith(".php"))
-            {
-                newComment = $"<?php\r\n{newComment}";
             }
             return newComment;
         }
