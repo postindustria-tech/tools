@@ -19,8 +19,8 @@ try {
         Copy-Item "$RepoPath/Java/DeviceData.java" "../../$TargetRepo/device-detection.shared/src/main/java/fiftyone/devicedetection/shared/"
     }
     elseif ($TargetRepo -eq "device-detection-dotnet") {
-        Copy-Item "$RepoPath/CSharp/IDeviceData.cs" "../../$TargetRepo/FiftyOne.DeviceDetection/FiftyOne.DeviceDetection.Data/Data/"
-        Copy-Item "$RepoPath/CSharp/DeviceDataBase.cs" "../../$TargetRepo/FiftyOne.DeviceDetection/FiftyOne.DeviceDetection.Data/"
+        Copy-Item "$RepoPath/CSharp/IDeviceData.cs" "../../$TargetRepo/FiftyOne.DeviceDetection.Data/Data/"
+        Copy-Item "$RepoPath/CSharp/DeviceDataBase.cs" "../../$TargetRepo/FiftyOne.DeviceDetection.Data/"
     }
 
 }
