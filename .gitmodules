@@ -1,0 +1,3 @@
+[submodule "ip-intelligence-dotnet"]
+	path = ip-intelligence-dotnet
+	url = https://github.com/51degrees/ip-intelligence-dotnet
