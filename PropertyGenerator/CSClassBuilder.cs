@@ -1,4 +1,5 @@
 ﻿using FiftyOne.DeviceDetection.Hash.Engine.OnPremise.FlowElements;
+using FiftyOne.MetaData.Entities;
 using FiftyOne.Pipeline.Core.Data.Types;
 using FiftyOne.Pipeline.Engines.FiftyOne.Data;
 using System;
@@ -10,12 +11,72 @@ using System.Text.RegularExpressions;
 
 namespace PropertyGenerationTool
 {
-    internal class CSClassBuilder
+    internal class EngineCSClassBuilder : CSClassBuilder<IFiftyOneAspectPropertyMetaData>
     {
-        internal static string GetReturnType(IFiftyOneAspectPropertyMetaData property)
+        protected override string GetPropertyDescription(IFiftyOneAspectPropertyMetaData property)
+        {
+            return property.Description;
+        }
+
+        protected override string GetPropertyName(IFiftyOneAspectPropertyMetaData property)
+        {
+            return property.Name;
+        }
+
+        protected override Type GetPropertyType(IFiftyOneAspectPropertyMetaData property)
+        {
+            return property.Type;
+        }
+    }
+
+    internal class MetaDataCSClassBuilder : CSClassBuilder<IPropertyMetaData>
+    {
+        protected override string GetPropertyDescription(IPropertyMetaData property)
+        {
+            return property.Description;
+        }
+
+        protected override string GetPropertyName(IPropertyMetaData property)
+        {
+            return property.Name;
+        }
+
+        protected override Type GetPropertyType(IPropertyMetaData property)
+        {
+            switch (property.ValueType)
+            {
+                case ValueTypeEnum.String:
+                    return typeof(string);
+                case ValueTypeEnum.Int:
+                    return typeof(int);
+                case ValueTypeEnum.Double:
+                    return typeof(double);
+                case ValueTypeEnum.Bool:
+                    return typeof(bool);
+                case ValueTypeEnum.JavaScript:
+                    return typeof(JavaScript);
+                case ValueTypeEnum.Single:
+                    return typeof(float);
+                case ValueTypeEnum.IP:
+                    return typeof(string); // TODO needs type
+                case ValueTypeEnum.Byte:
+                    return typeof(byte);
+                case ValueTypeEnum.WKB:
+                    return typeof(string); // TODO needs type.
+                default:
+                    return null;
+            }
+        }
+    }
+
+    internal abstract class CSClassBuilder<T> : ClassBuilderBase<T>
+    {
+        internal string GetReturnType(
+            T property,
+            Func<string, string> formatType)
         {
             string typeString;
-            switch (property.Type)
+            switch (GetPropertyType(property))
             {
                 case Type intType when intType == typeof(Int32):
                     typeString = "int";
@@ -38,174 +99,184 @@ namespace PropertyGenerationTool
                     break;
             }
 
-            return $"IAspectPropertyValue<{typeString}>";
+            return formatType(typeString);
         }
 
-        internal static string GetGetterName(IFiftyOneAspectPropertyMetaData property)
+        internal string GetGetterName(T property)
         {
-            return property.Name
+            return GetPropertyName(property)
                 .Replace("/", "")
                 .Replace("-", "");
         }
 
-        internal static string GetLowerName(IFiftyOneAspectPropertyMetaData property)
-        {
-            return property.Name.ToLower();
-        }
-
-        internal static string GetGetter(IFiftyOneAspectPropertyMetaData property)
+        internal string GetGetter(
+            T property,
+            Func<string, string> formatType)
         {
             return String.Format(
                 "public {0} {1} {{ get {{ return GetAs<{0}>(\"{2}\"); }} }}",
-                GetReturnType(property),
+                GetReturnType(property, formatType),
                 GetGetterName(property),
-                property.Name);
+                GetPropertyName(property));
         }
 
-        internal static string GetDescription(IFiftyOneAspectPropertyMetaData property)
+        internal string GetDescription(T property)
         {
-            return Regex.Replace(property.Description, @"<.*>", delegate (Match match)
+            return Regex.Replace(GetPropertyDescription(property), @"<.*>", delegate (Match match)
             {
                 return $"<![CDATA[{match.Value}]]>";
             });
         }
-        internal static string GetKeyValuePair(IFiftyOneAspectPropertyMetaData property)
+
+        internal string GetKeyValuePair(
+            T property,
+            Func<string, string> formatType)
         {
            return String.Format("{{ \"{0}\", typeof({1}) }}",
-               property.Name,
-               GetReturnType(property));
+               GetPropertyName(property),
+               GetReturnType(property, formatType));
         }
 
-        internal static class Shared
+
+        internal void BuildInterface(
+            string name,
+            string copyright,
+            string description,
+            string nameSpace,
+            string[] includes,
+            T[] properties,
+            Func<string, string> formatType,
+            string outputPath)
         {
-            
-            private static string classNamespace = "FiftyOne.DeviceDetection.Shared";
-            private static string interfaceNamespace = "FiftyOne.DeviceDetection";
-
-            internal static void BuildInterface(DeviceDetectionHashEngine engine, string outputPath)
+            using (var outputStream = new FileStream(outputPath, FileMode.Create))
+            using (var writer = new StreamWriter(outputStream))
             {
-                using (var outputStream = new FileStream(outputPath, FileMode.Create))
-                using (var writer = new StreamWriter(outputStream))
+                writer.WriteLine(copyright);
+                writer.WriteLine("using FiftyOne.Pipeline.Core.Data.Types;");
+                writer.WriteLine("using FiftyOne.Pipeline.Engines.Data;");
+                writer.WriteLine("using System.Collections.Generic;");
+                writer.WriteLine("");
+
+                writer.WriteLine("// This interface sits at the top of the name space in order to make ");
+                writer.WriteLine("// life easier for consumers.");
+                writer.WriteLine(String.Format("namespace {0}", nameSpace));
+                writer.WriteLine("{");
+                writer.WriteLine("\t/// <summary>");
+                writer.WriteLine(description);
+	            writer.WriteLine("\t/// </summary>");
+                writer.WriteLine($"\tpublic interface {name} : IAspectData");
+                writer.WriteLine("\t{");
+                foreach (var property in properties
+                    .Where(p => Constants.excludedProperties.Contains(GetPropertyName(p)) == false)
+                    .OrderBy(GetPropertyName))
                 {
-                    DeviceDetection.WriteCopyright(writer);
-                    writer.WriteLine("using FiftyOne.Pipeline.Core.Data.Types;");
-                    writer.WriteLine("using FiftyOne.Pipeline.Engines.Data;");
-                    writer.WriteLine("using System.Collections.Generic;");
-                    writer.WriteLine("");
-
-                    writer.WriteLine("// This interface sits at the top of the name space in order to make ");
-                    writer.WriteLine("// life easier for consumers.");
-                    writer.WriteLine(String.Format("namespace {0}", interfaceNamespace));
-                    writer.WriteLine("{");
-                    writer.WriteLine("\t/// <summary>");
-                    writer.WriteLine("\t/// Represents a data object containing values relating to a device.");
-                    writer.WriteLine("\t/// This includes the hardware, operating system and browser as");
-                    writer.WriteLine("\t/// well as crawler details if the request actually came from a ");
-                    writer.WriteLine("\t/// bot or other automated system.");
-	                writer.WriteLine("\t/// </summary>");
-                    writer.WriteLine("\tpublic interface IDeviceData : IAspectData");
-                    writer.WriteLine("\t{");
-                    foreach (var property in engine.Properties
-                        .Where(p => Constants.excludedProperties.Contains(p.Name) == false)
-                        .OrderBy(p => p.Name))
-                    {
-                        writer.WriteLine("\t\t/// <summary>");
-                        writer.WriteLine("\t\t/// " + GetDescription(property));
-                        writer.WriteLine("\t\t/// </summary>");
-                        writer.WriteLine("\t\t{0} {1} {{ get; }}",
-                            GetReturnType(property),
-                            GetGetterName(property));
-                    }
-
-                    writer.WriteLine("\t}");
-                    writer.WriteLine("}");
-                }
-            }
-
-            internal static void BuildClass(DeviceDetectionHashEngine engine, string outputPath)
-            {
-                using (var outputStream = new FileStream(outputPath, FileMode.Create))
-                using (var writer = new StreamWriter(outputStream))
-                {
-                    DeviceDetection.WriteCopyright(writer);
-                    writer.WriteLine("using FiftyOne.Pipeline.Core.Data;");
-                    writer.WriteLine("using FiftyOne.Pipeline.Core.Data.Types;");
-                    writer.WriteLine("using FiftyOne.Pipeline.Core.FlowElements;");
-                    writer.WriteLine("using FiftyOne.Pipeline.Engines.Data;");
-                    writer.WriteLine("using FiftyOne.Pipeline.Engines.FlowElements;");
-                    writer.WriteLine("using FiftyOne.Pipeline.Engines.Services;");
-                    writer.WriteLine("using Microsoft.Extensions.Logging;");
-                    writer.WriteLine("using System;");
-                    writer.WriteLine("using System.Collections.Generic;");
-                    writer.WriteLine(String.Format("namespace {0}", classNamespace));
-                    writer.WriteLine("{");
-                    writer.WriteLine("\t/// <summary>");
-                    writer.WriteLine("\t/// Abstract base class for properties relating to a device.");
-                    writer.WriteLine("\t/// This includes the hardware, operating system and browser as");
-                    writer.WriteLine("\t/// well as crawler details if the request actually came from a ");
-                    writer.WriteLine("\t/// bot or other automated system.");
-                    writer.WriteLine("\t/// </summary>");
-                    writer.WriteLine("\tpublic abstract class DeviceDataBase : AspectDataBase, IDeviceData");
-                    writer.WriteLine("\t{");
                     writer.WriteLine("\t\t/// <summary>");
-                    writer.WriteLine("\t\t/// Constructor.");
+                    writer.WriteLine("\t\t/// " + GetDescription(property));
                     writer.WriteLine("\t\t/// </summary>");
-                    writer.WriteLine("\t\t/// <param name=\"logger\">");
-                    writer.WriteLine("\t\t/// The logger for this instance to use.");
-                    writer.WriteLine("\t\t/// </param>");
-                    writer.WriteLine("\t\t/// <param name=\"pipeline\">");
-                    writer.WriteLine("\t\t/// The Pipeline this data instance has been created by.");
-                    writer.WriteLine("\t\t/// </param>");
-                    writer.WriteLine("\t\t/// <param name=\"engine\">");
-                    writer.WriteLine("\t\t/// The engine this data instance has been created by.");
-                    writer.WriteLine("\t\t/// </param>");
-                    writer.WriteLine("\t\t/// <param name=\"missingPropertyService\">");
-                    writer.WriteLine("\t\t/// The missing property service to use when a requested property");
-		            writer.WriteLine("\t\t/// does not exist.");
-                    writer.WriteLine("\t\t/// </param>");
-                    writer.WriteLine("\t\tprotected DeviceDataBase(");
-                    writer.WriteLine("\t\t\tILogger<AspectDataBase> logger,");
-                    writer.WriteLine("\t\t\tIPipeline pipeline,");
-                    writer.WriteLine("\t\t\tIAspectEngine engine,");
-                    writer.WriteLine("\t\t\tIMissingPropertyService missingPropertyService)");
-                    writer.WriteLine("\t\t\t: base(logger, pipeline, engine, missingPropertyService) { }");
-                    writer.WriteLine("");
-
-                    writer.WriteLine("\t\tprotected static readonly IReadOnlyDictionary<string, Type> PropertyTypes =");
-                    writer.WriteLine("\t\t\tnew Dictionary<string, Type>()");
-                    writer.WriteLine("\t\t\t{");
-
-                    List<IFiftyOneAspectPropertyMetaData> properties = engine.Properties
-                        .Where(p => Constants.excludedProperties.Contains(p.Name) == false)
-                        .OrderBy(p => p.Name)
-                        .ToList();
-
-                    foreach (var property in properties)
-                    {
-                        // Checks if the current element is the last
-                        // and adds coma at the end if it is not.
-                        if (properties.IndexOf(property) != properties.Count -1)
-                        {
-                            writer.WriteLine("\t\t\t\t" + GetKeyValuePair(property) + ",");
-                        }
-                        else
-                        {
-                            writer.WriteLine("\t\t\t\t" + GetKeyValuePair(property));
-                        }
-                    }
-                    writer.WriteLine("\t\t\t};");
-                    writer.WriteLine("");
-
-                    foreach (var property in properties)
-                    {
-                        writer.WriteLine("\t\t/// <summary>");
-                        writer.WriteLine("\t\t/// " + GetDescription(property));
-                        writer.WriteLine("\t\t/// </summary>");
-                        writer.WriteLine("\t\t" + GetGetter(property));
-                    }
-                    writer.WriteLine("\t}");
-                    writer.WriteLine("}");
+                    writer.WriteLine("\t\t{0} {1} {{ get; }}",
+                        GetReturnType(property, formatType),
+                        GetGetterName(property));
                 }
+
+                writer.WriteLine("\t}");
+                writer.WriteLine("}");
+            }
+        }
+
+        internal void BuildClass(
+            string name,
+            string interfaceName,
+            string copyright,
+            string description,
+            string nameSpace,
+            string[] includes,
+            T[] properties,
+            Func<string, string> formatType,
+            string outputPath)
+        {
+            using (var outputStream = new FileStream(outputPath, FileMode.Create))
+            using (var writer = new StreamWriter(outputStream))
+            {
+                writer.WriteLine(copyright);
+                foreach (var include in includes)
+                {
+                    writer.WriteLine($"using {include};");
+                }
+                writer.WriteLine("using FiftyOne.Pipeline.Core.Data;");
+                writer.WriteLine("using FiftyOne.Pipeline.Core.Data.Types;");
+                writer.WriteLine("using FiftyOne.Pipeline.Core.FlowElements;");
+                writer.WriteLine("using FiftyOne.Pipeline.Engines.Data;");
+                writer.WriteLine("using FiftyOne.Pipeline.Engines.FlowElements;");
+                writer.WriteLine("using FiftyOne.Pipeline.Engines.Services;");
+                writer.WriteLine("using Microsoft.Extensions.Logging;");
+                writer.WriteLine("using System;");
+                writer.WriteLine("using System.Collections.Generic;");
+                writer.WriteLine(String.Format("namespace {0}", nameSpace));
+                writer.WriteLine("{");
+                writer.WriteLine("\t/// <summary>");
+                // TODO
+                writer.WriteLine(description);
+                writer.WriteLine("\t/// </summary>");
+                writer.WriteLine($"\tpublic abstract class {name} : AspectDataBase, {interfaceName}");
+                writer.WriteLine("\t{");
+                writer.WriteLine("\t\t/// <summary>");
+                writer.WriteLine("\t\t/// Constructor.");
+                writer.WriteLine("\t\t/// </summary>");
+                writer.WriteLine("\t\t/// <param name=\"logger\">");
+                writer.WriteLine("\t\t/// The logger for this instance to use.");
+                writer.WriteLine("\t\t/// </param>");
+                writer.WriteLine("\t\t/// <param name=\"pipeline\">");
+                writer.WriteLine("\t\t/// The Pipeline this data instance has been created by.");
+                writer.WriteLine("\t\t/// </param>");
+                writer.WriteLine("\t\t/// <param name=\"engine\">");
+                writer.WriteLine("\t\t/// The engine this data instance has been created by.");
+                writer.WriteLine("\t\t/// </param>");
+                writer.WriteLine("\t\t/// <param name=\"missingPropertyService\">");
+                writer.WriteLine("\t\t/// The missing property service to use when a requested property");
+		        writer.WriteLine("\t\t/// does not exist.");
+                writer.WriteLine("\t\t/// </param>");
+                writer.WriteLine($"\t\tprotected {name}(");
+                writer.WriteLine("\t\t\tILogger<AspectDataBase> logger,");
+                writer.WriteLine("\t\t\tIPipeline pipeline,");
+                writer.WriteLine("\t\t\tIAspectEngine engine,");
+                writer.WriteLine("\t\t\tIMissingPropertyService missingPropertyService)");
+                writer.WriteLine("\t\t\t: base(logger, pipeline, engine, missingPropertyService) { }");
+                writer.WriteLine("");
+
+                writer.WriteLine("\t\tprotected static readonly IReadOnlyDictionary<string, Type> PropertyTypes =");
+                writer.WriteLine("\t\t\tnew Dictionary<string, Type>()");
+                writer.WriteLine("\t\t\t{");
+
+                var filteredProperties = properties
+                    .Where(p => Constants.excludedProperties.Contains(GetPropertyName(p)) == false)
+                    .OrderBy(GetPropertyName)
+                    .ToList();
+
+                foreach (var property in filteredProperties)
+                {
+                    // Checks if the current element is the last
+                    // and adds coma at the end if it is not.
+                    if (filteredProperties.IndexOf(property) != filteredProperties.Count -1)
+                    {
+                        writer.WriteLine("\t\t\t\t" + GetKeyValuePair(property, formatType) + ",");
+                    }
+                    else
+                    {
+                        writer.WriteLine("\t\t\t\t" + GetKeyValuePair(property, formatType));
+                    }
+                }
+                writer.WriteLine("\t\t\t};");
+                writer.WriteLine("");
+
+                foreach (var property in properties)
+                {
+                    writer.WriteLine("\t\t/// <summary>");
+                    writer.WriteLine("\t\t/// " + GetDescription(property));
+                    writer.WriteLine("\t\t/// </summary>");
+                    writer.WriteLine("\t\t" + GetGetter(property, formatType));
+                }
+                writer.WriteLine("\t}");
+                writer.WriteLine("}");
             }
         }
     }

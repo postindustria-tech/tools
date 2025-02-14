@@ -9,6 +9,12 @@
 
   <ItemGroup>
     <PackageReference Include="FiftyOne.DeviceDetection.Hash.Engine.OnPremise" Version="4.4.201" />
+    <PackageReference Include="FiftyOne.MetaData" Version="5.0.28" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ip-intelligence-dotnet\FiftyOne.IpIntelligence\FiftyOne.IpIntelligence.Engine.OnPremise\FiftyOne.IpIntelligence.Engine.OnPremise.csproj" />
+    <ProjectReference Include="..\ip-intelligence-dotnet\FiftyOne.IpIntelligence\FiftyOne.IpIntelligence.Shared\FiftyOne.IpIntelligence.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>
