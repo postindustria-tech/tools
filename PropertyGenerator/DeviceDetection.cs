@@ -3,6 +3,9 @@ using PropertyGenerator;
 
 namespace PropertyGenerationTool
 {
+    /// <summary>
+    /// Generator for Device Detection engines.
+    /// </summary>
     public class DeviceDetection : GeneratorBase
     {
         private readonly DeviceDetectionHashEngine _engine;

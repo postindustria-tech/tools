@@ -12,6 +12,10 @@ using System.Threading.Tasks;
 
 namespace PropertyGenerationTool
 {
+    /// <summary>
+    /// Engine based implementation of JavaClassBuilder.
+    /// This uses property metdata from an engine to get the properties.
+    /// </summary>
     internal class EngineJavaClassBuilder : JavaClassBuilder<IFiftyOneAspectPropertyMetaData>
     {
         protected override string GetPropertyDescription(IFiftyOneAspectPropertyMetaData property)
@@ -30,46 +34,12 @@ namespace PropertyGenerationTool
         }
     }
 
-    internal class MetaDataJavaClassBuilder : JavaClassBuilder<IPropertyMetaData>
-    {
-        protected override string GetPropertyDescription(IPropertyMetaData property)
-        {
-            return property.Description;
-        }
-
-        protected override string GetPropertyName(IPropertyMetaData property)
-        {
-            return property.Name;
-        }
-
-        protected override Type GetPropertyType(IPropertyMetaData property)
-        {
-            switch (property.ValueType)
-            {
-                case ValueTypeEnum.String:
-                    return typeof(string);
-                case ValueTypeEnum.Int:
-                    return typeof(int);
-                case ValueTypeEnum.Double:
-                    return typeof(double);
-                case ValueTypeEnum.Bool:
-                    return typeof(bool);
-                case ValueTypeEnum.JavaScript:
-                    return typeof(JavaScript);
-                case ValueTypeEnum.Single:
-                    return typeof(float);
-                case ValueTypeEnum.IP:
-                    return typeof(string); // TODO needs type
-                case ValueTypeEnum.Byte:
-                    return typeof(byte);
-                case ValueTypeEnum.WKB:
-                    return typeof(string); // TODO needs type.
-                default:
-                    return null;
-            }
-        }
-    }
-
+    /// <summary>
+    /// Class builder for Java.
+    /// Methods for getting info from a property are extracted so that the
+    /// class is not tied to the type of property.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     internal abstract class JavaClassBuilder<T> : ClassBuilderBase<T>
     {
         internal string GetReturnType(

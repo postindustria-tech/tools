@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace PropertyGenerator
 {
+    /// <summary>
+    /// Base class for generator implementation containing common code.
+    /// </summary>
     public abstract class GeneratorBase : IGenerator
     {
         public abstract void BuildCSharp(string path);

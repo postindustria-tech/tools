@@ -5,6 +5,9 @@ using PropertyGenerationTool;
 
 namespace PropertyGenerator
 {
+    /// <summary>
+    /// Generator for IP Intelligence engines.
+    /// </summary>
     internal class IpIntelligence : GeneratorBase
     {
         private readonly string _copyright;
