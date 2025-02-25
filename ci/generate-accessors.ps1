@@ -1,6 +1,6 @@
 param (
     [Parameter(Mandatory)][string]$RepoName,
-    [string]$DataFile = "$RepoName/TAC-HashV41.hash"
+    [Parameter(Mandatory)][string]$DataFile
 )
 $ErrorActionPreference = "Stop"
 $PSNativeCommandUseErrorActionPreference = $true
