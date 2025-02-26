@@ -122,6 +122,10 @@ namespace PropertyGenerationTool
             using (var writer = new StreamWriter(outputStream))
             {
                 writer.WriteLine(copyright);
+                foreach (var include in includes)
+                {
+                    writer.WriteLine($"using {include};");
+                }
                 writer.WriteLine("using FiftyOne.Pipeline.Core.Data;");
                 writer.WriteLine("using FiftyOne.Pipeline.Engines.Data;");
                 writer.WriteLine("using System.Collections.Generic;");
