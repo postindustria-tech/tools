@@ -122,7 +122,7 @@ namespace PropertyGenerationTool
             using (var writer = new StreamWriter(outputStream))
             {
                 writer.WriteLine(copyright);
-                writer.WriteLine("using FiftyOne.Pipeline.Core.Data.Types;");
+                writer.WriteLine("using FiftyOne.Pipeline.Core.Data;");
                 writer.WriteLine("using FiftyOne.Pipeline.Engines.Data;");
                 writer.WriteLine("using System.Collections.Generic;");
                 writer.WriteLine("");
@@ -173,7 +173,6 @@ namespace PropertyGenerationTool
                     writer.WriteLine($"using {include};");
                 }
                 writer.WriteLine("using FiftyOne.Pipeline.Core.Data;");
-                writer.WriteLine("using FiftyOne.Pipeline.Core.Data.Types;");
                 writer.WriteLine("using FiftyOne.Pipeline.Core.FlowElements;");
                 writer.WriteLine("using FiftyOne.Pipeline.Engines.Data;");
                 writer.WriteLine("using FiftyOne.Pipeline.Engines.FlowElements;");
@@ -184,7 +183,6 @@ namespace PropertyGenerationTool
                 writer.WriteLine(String.Format("namespace {0}", nameSpace));
                 writer.WriteLine("{");
                 writer.WriteLine("\t/// <summary>");
-                // TODO
                 writer.WriteLine(description);
                 writer.WriteLine("\t/// </summary>");
                 writer.WriteLine($"\tpublic abstract class {name} : AspectDataBase, {interfaceName}");
@@ -213,6 +211,10 @@ namespace PropertyGenerationTool
                 writer.WriteLine("\t\t\t: base(logger, pipeline, engine, missingPropertyService) { }");
                 writer.WriteLine("");
 
+                writer.WriteLine("\t\t/// <summary>");
+                writer.WriteLine("\t\t/// Dictionary of property value types, keyed on the string");
+                writer.WriteLine("\t\t/// name of the type.");
+                writer.WriteLine("\t\t/// </summary>");
                 writer.WriteLine("\t\tprotected static readonly IReadOnlyDictionary<string, Type> PropertyTypes =");
                 writer.WriteLine("\t\t\tnew Dictionary<string, Type>()");
                 writer.WriteLine("\t\t\t{");

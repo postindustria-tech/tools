@@ -39,7 +39,10 @@ namespace PropertyGenerationTool
                 _copyright,
                 interfaceDescription,
                 "FiftyOne.DeviceDetection",
-                new string[0],
+                new string[]
+                {
+                    "FiftyOne.Pipeline.Core.Data.Types"
+                },
                 _engine.Properties.ToArray(),
                 (s) => $"IAspectPropertyValue<{s}>",
                 basePath + "/IDeviceData.cs");
@@ -52,7 +55,10 @@ namespace PropertyGenerationTool
                 _copyright,
                 classDescription,
                 "FiftyOne.DeviceDetection.Shared",
-                new string[0],
+                new string[]
+                {
+                    "FiftyOne.Pipeline.Core.Data.Types"
+                },
                 _engine.Properties.ToArray(),
                 (s) => $"IAspectPropertyValue<{s}>",
                 basePath + "/DeviceDataBase.cs");
