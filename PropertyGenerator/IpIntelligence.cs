@@ -40,7 +40,7 @@ namespace PropertyGenerator
                 copyright,
                 interfaceDescription,
                 "FiftyOne.IpIntelligence",
-                new string[0],
+                new string[] { "System.Net" },
                 _engine.Properties.ToArray(),
                 (s) => $"IAspectPropertyValue<IReadOnlyList<IWeightedValue<{s}>>>",
                 basePath + "/IIpIntelligenceData.cs");
@@ -53,7 +53,7 @@ namespace PropertyGenerator
                 _copyright,
                 classDescription,
                 "FiftyOne.IpIntelligence.Shared",
-                new string[0],
+                new string[] { "System.Net" },
                 _engine.Properties.ToArray(),
                 (s) => $"IAspectPropertyValue<IReadOnlyList<IWeightedValue<{s}>>>",
                 basePath + "/IpIntelligenceDataBase.cs");
