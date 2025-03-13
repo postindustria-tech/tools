@@ -13,8 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ip-intelligence-dotnet\FiftyOne.IpIntelligence\FiftyOne.IpIntelligence.Engine.OnPremise\FiftyOne.IpIntelligence.Engine.OnPremise.csproj" />
-    <ProjectReference Include="..\ip-intelligence-dotnet\FiftyOne.IpIntelligence\FiftyOne.IpIntelligence.Shared\FiftyOne.IpIntelligence.Shared.csproj" />
+    <ProjectReference Include="..\ip-intelligence-dotnet\FiftyOne.IpIntelligence.Engine.OnPremise\FiftyOne.IpIntelligence.Engine.OnPremise.csproj" />
   </ItemGroup>
 
   <ItemGroup>

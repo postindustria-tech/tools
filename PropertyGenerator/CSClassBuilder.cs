@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -59,6 +60,12 @@ namespace PropertyGenerationTool
                     break;
                 case Type listType when listType == typeof(IReadOnlyList<string>):
                     typeString = "IReadOnlyList<string>";
+                    break;
+                case Type floatType when floatType == typeof(float):
+                    typeString = "float";
+                    break;
+                case Type ipType when ipType == typeof(IPAddress):
+                    typeString = "IPAddress";
                     break;
                 case Type javaScriptType when javaScriptType == typeof(JavaScript):
                     typeString = "JavaScript";
