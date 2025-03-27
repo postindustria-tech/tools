@@ -5,14 +5,6 @@ VisualStudioVersion = 17.2.32630.192
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PropertyGenerator", "PropertyGenerator\PropertyGenerator.csproj", "{B7C672E1-9490-42A5-A7E8-AC207B4E2167}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FiftyOne.IpIntelligence.CPP", "ip-intelligence-dotnet\FiftyOne.IpIntelligence\ip-intelligence-cxx\VisualStudio\FiftyOne.IpIntelligence.CPP\FiftyOne.IpIntelligence.CPP.vcxproj", "{341FD8CB-9456-4711-BEC8-C4A218FA1C6C}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FiftyOne.IpIntelligence.C", "ip-intelligence-dotnet\FiftyOne.IpIntelligence\ip-intelligence-cxx\VisualStudio\FiftyOne.IpIntelligence.C\FiftyOne.IpIntelligence.C.vcxproj", "{EDDF7B03-A483-4B52-9234-4585AF17B284}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FiftyOne.Common.C", "ip-intelligence-dotnet\FiftyOne.IpIntelligence\ip-intelligence-cxx\src\common-cxx\VisualStudio\FiftyOne.Common.C\FiftyOne.Common.C.vcxproj", "{8E1B0B4C-8220-4E7B-A838-B4B3DDB4CF15}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FiftyOne.Common.CPP", "ip-intelligence-dotnet\FiftyOne.IpIntelligence\ip-intelligence-cxx\src\common-cxx\VisualStudio\FiftyOne.Common.CPP\FiftyOne.Common.CPP.vcxproj", "{01DCCD38-27CC-4C1A-851F-F1700EDF8BB5}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FiftyOne.IpIntelligence.Shared", "ip-intelligence-dotnet\FiftyOne.IpIntelligence.Shared\FiftyOne.IpIntelligence.Shared.csproj", "{6FD12003-0EEF-471D-822B-D90DA3554CD0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FiftyOne.IpIntelligence.Engine.OnPremise", "ip-intelligence-dotnet\FiftyOne.IpIntelligence.Engine.OnPremise\FiftyOne.IpIntelligence.Engine.OnPremise.csproj", "{10248EF5-F8B1-4541-8208-9AA0141A7D59}"

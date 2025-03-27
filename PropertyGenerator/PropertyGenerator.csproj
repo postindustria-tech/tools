@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FiftyOne.DeviceDetection.Hash.Engine.OnPremise" Version="4.4.201" />
+    <PackageReference Include="FiftyOne.DeviceDetection.Hash.Engine.OnPremise" Version="4.4.213" />
     <PackageReference Include="FiftyOne.MetaData" Version="5.0.28" />
   </ItemGroup>
 

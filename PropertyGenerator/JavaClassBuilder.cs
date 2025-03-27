@@ -90,7 +90,7 @@ namespace PropertyGenerationTool
         {
             var type = GetReturnType(property, formatType);
             var parts = type.Split(new[] { '<', '>', ','}, StringSplitOptions.RemoveEmptyEntries);
-            return $"public {type} {GetGetterName(property)}() {{ return getAs(\"{GetPropertyName(property).ToLower()}\", {string.Join(", ", parts.Select(p => p + ".class"))}.class); }}";
+            return $"public {type} {GetGetterName(property)}() {{ return getAs(\"{GetPropertyName(property).ToLower()}\", {string.Join(", ", parts.Select(p => p + ".class"))}); }}";
         }
 
         internal void BuildInterface(
