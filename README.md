@@ -49,3 +49,7 @@ TODO: Description of process including:
 
 This repository contains a precompiled DoxyGen binary from the 51Degrees source version of DoxyGen.
 This has a few modifications. See [source](https://github.com/51degrees/DoxyGen) for more.
+
+## GitHubAutiomation
+
+Contains scripts for automating administrative GitHub tasks.
